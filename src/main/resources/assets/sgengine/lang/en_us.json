@@ -1,0 +1,13 @@
+{
+  "itemGroup.sgengine": "Example Mod Tab",
+  "block.sgengine.example_block": "Example Block",
+  "item.sgengine.example_item": "Example Item",
+
+  "sgengine.configuration.title": "SGEngine Configs",
+  "sgengine.configuration.section.sgengine.common.toml": "SGEngine Configs",
+  "sgengine.configuration.section.sgengine.common.toml.title": "SGEngine Configs",
+  "sgengine.configuration.items": "Item List",
+  "sgengine.configuration.logDirtBlock": "Log Dirt Block",
+  "sgengine.configuration.magicNumberIntroduction": "Magic Number Text",
+  "sgengine.configuration.magicNumber": "Magic Number"
+}
