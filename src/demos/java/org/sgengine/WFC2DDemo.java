@@ -6,6 +6,7 @@ Controls:
   - G: generate new result
 */
 
+import org.sgengine.algorithms.MapSize;
 import org.sgengine.algorithms.WFC2D;
 
 void main() {
@@ -76,16 +77,25 @@ public static class WFC2DDemo extends processing.core.PApplet {
         }
     }
 
+    @SuppressWarnings("RedundantLabeledSwitchRuleCodeBlock")
     @Override
     public void keyReleased() {
-        if ('0' <= key && key <= '9') {
-            currentColorIndex = key - '0';
-            return;
-        }
+        switch (key) {
+            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+                currentColorIndex = key - '0';
+            }
 
-        if (key == 'g') {
-            resultGrid = new WFC2D(sampleGrid).generate(RESULT_WIDTH, RESULT_HEIGHT);
-            return;
+            case 'g', 'G' -> {
+                resultGrid = new WFC2D(sampleGrid).generate(
+                    new MapSize(RESULT_HEIGHT, RESULT_WIDTH)
+                );
+            }
+
+            case 'c', 'C' -> {
+                for (int[] ints : sampleGrid) {
+                    Arrays.fill(ints, 0);
+                }
+            }
         }
     }
 

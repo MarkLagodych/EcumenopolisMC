@@ -1,74 +1,241 @@
-/*
-Tile type IDs can only be ints in the range [0..9]
-*/
-
 package org.sgengine.algorithms;
 
-import java.util.ArrayList;
-
-record Position(int x, int y) {
-}
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class WFC2D {
-    final int N_TILE_TYPES = 10;
+    // Set of all tile types that appear in the sample
+    HashSet<Integer> allTiles = new HashSet<>();
 
-    /**
-     * <code>horizontalAdjacencies[leftTileType][rightTileType]</code>
-     * contains the number of times the leftTileType comes to the left
-     * of rightTileType.
-     */
-    int[][] horizontalAdjacencies;
+    // Tile type -> Number of times that tile type appears in the sample
+    HashMap<Integer, Integer> tileFrequencies = new HashMap<>();
 
-    /**
-     * <code>verticalAdjacencies[topTileType][bottomTileType]</code>
-     * contains the number of times the topTileType comes at the top
-     * of bottomTileType.
-     */
-    int[][] verticalAdjacencies;
+    // NeighbourDirection -> Tile type -> Set of valid neighbour tile types in that direction
+    @SuppressWarnings("unchecked")
+    HashMap<Integer, HashSet<Integer>>[] validNeighboursAtDirection = new HashMap[]{
+        new HashMap<>(), // ABOVE
+        new HashMap<>(), // RIGHT
+        new HashMap<>(), // BELOW
+        new HashMap<>()  // LEFT
+    };
 
-    public WFC2D(int[][] sample) {
-        verticalAdjacencies = new int[N_TILE_TYPES][N_TILE_TYPES];
-        horizontalAdjacencies = new int[N_TILE_TYPES][N_TILE_TYPES];
-        computeAdjacencies(sample);
+    void addValidNeighbours(int tile, int neighbourTile, NeighbourDirection dir) {
+        validNeighboursAtDirection[dir.value]
+            .computeIfAbsent(tile, _ -> new HashSet<>())
+            .add(neighbourTile);
     }
 
-    private void computeAdjacencies(int[][] sample) {
-        final int SAMPLE_HEIGHT = sample.length;
-        final int SAMPLE_WIDTH = sample[0].length;
+    HashSet<Integer> getValidNeighbours(int tile, NeighbourDirection dir) {
+        return validNeighboursAtDirection[dir.value]
+            .getOrDefault(tile, new HashSet<>());
+    }
 
-        for (int row = 0; row < SAMPLE_HEIGHT - 1; row++) {
-            for (int col = 0; col < SAMPLE_WIDTH - 1; col++) {
-                int tile = sample[row][col];
-                int rightTile = sample[row][col + 1];
-                int bottomTile = sample[row + 1][col];
+    public WFC2D(int[][] sample) {
+        addAllTiles(sample);
+        computeTileFrequencies(sample);
+        computeValidPairs(sample);
+    }
 
-                horizontalAdjacencies[tile][rightTile]++;
-                verticalAdjacencies[tile][bottomTile]++;
+    void addAllTiles(int[][] sample) {
+        for (int[] row : sample) {
+            for (int tileType : row) {
+                allTiles.add(tileType);
             }
         }
     }
 
-    public int[][] generate(int width, int height) {
-        var collapsed = new int[height][width];
+    void computeValidPairs(int[][] sample) {
+        var size = new MapSize(sample.length, sample[0].length);
 
-        var discovered = new ArrayList<Position>();
+        for (int row = 0; row < size.rows() - 1; row++) {
+            for (int col = 0; col < size.cols() - 1; col++) {
+                int tile = sample[row][col];
+                int rightTile = sample[row][col + 1];
+                int bottomTile = sample[row + 1][col];
 
-        discovered.add(new Position(0, 0));
+                addValidNeighbours(tile, rightTile, NeighbourDirection.RIGHT);
+                addValidNeighbours(tile, bottomTile, NeighbourDirection.BELOW);
 
-        return collapsed;
+                addValidNeighbours(rightTile, tile, NeighbourDirection.LEFT);
+                addValidNeighbours(bottomTile, tile, NeighbourDirection.ABOVE);
+            }
+        }
     }
 
-    private void addNeighbours(ArrayList<Position> neighbours, Position p, int width, int height) {
-        if (p.x() > 0)
-            neighbours.add(new Position(p.x() - 1, p.y()));
-
-        if (p.y() > 0)
-            neighbours.add(new Position(p.x(), p.y() - 1));
-
-        if (p.x() < width - 1)
-            neighbours.add(new Position(p.x() + 1, p.y()));
-
-        if (p.y() < height - 1)
-            neighbours.add(new Position(p.x(), p.y() + 1));
+    void computeTileFrequencies(int[][] sample) {
+        for (int[] row : sample) {
+            for (int tileType : row) {
+                int freq = tileFrequencies.getOrDefault(tileType, 0);
+                freq++;
+                tileFrequencies.put(tileType, freq);
+            }
+        }
     }
+
+    public int[][] generate(MapSize size) {
+        final int MAX_ATTEMPTS = 10;
+
+        for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+            try {
+                var state = new CollapseState(size);
+                state.collapse();
+                return state.getResult();
+            } catch (RuntimeException e) {
+                System.err.println("Attempt " + attempt + " failed: " + e.getMessage());
+            }
+        }
+
+        throw new RuntimeException(
+            "Failed to generate a valid grid after " + MAX_ATTEMPTS + " tries"
+        );
+    }
+
+    class CollapseState {
+        record UncollapsedItem(TilePosition position, float entropy) {
+        }
+
+        RandomGenerator random = new Random();
+
+        final MapSize size;
+
+        UncollapsedItem[][] uncollapsedMap;
+
+        UncollapsedItem getUncollapsedItemAt(TilePosition p) {
+            return uncollapsedMap[p.row()][p.column()];
+        }
+
+        void setUncollapsedItemAt(TilePosition p, UncollapsedItem item) {
+            uncollapsedMap[p.row()][p.column()] = item;
+        }
+
+        PriorityQueue<UncollapsedItem> uncollapsedQueue = new PriorityQueue<>(
+            (a, b) -> Float.compare(a.entropy, b.entropy)
+        );
+
+        Integer[][] collapsedTileTypes;
+
+        Integer getCollapsedTileTypeAt(TilePosition p) {
+            return collapsedTileTypes[p.row()][p.column()];
+        }
+
+        void setCollapsedTileTypeAt(TilePosition p, Integer tileType) {
+            collapsedTileTypes[p.row()][p.column()] = tileType;
+        }
+
+        public CollapseState(MapSize size) {
+            this.size = size;
+            this.uncollapsedMap = new UncollapsedItem[size.rows()][size.cols()];
+            this.collapsedTileTypes = new Integer[size.rows()][size.cols()];
+        }
+
+        public void collapse() {
+            uncollapsedQueue.add(new UncollapsedItem(new TilePosition(0, 0), 0.0f));
+
+            while (!uncollapsedQueue.isEmpty()) {
+                var pos = uncollapsedQueue.poll().position;
+
+                collapseTileAt(pos);
+
+                addNeighboursToCollapse(pos);
+            }
+        }
+
+        HashSet<Integer> getValidTileTypesAt(TilePosition pos) {
+            HashSet<Integer> validTileTypes = new HashSet<>(allTiles);
+
+            for (var dir : NeighbourDirection.values()) {
+                var neighbourPos = pos.neighbour(dir);
+                if (!neighbourPos.isInBounds(size)) {
+                    continue;
+                }
+
+                Integer neighbourTileType = getCollapsedTileTypeAt(neighbourPos);
+                if (neighbourTileType == null) {
+                    continue;
+                }
+
+                var validNeighbours = getValidNeighbours(neighbourTileType, dir.opposite());
+
+                validTileTypes.retainAll(validNeighbours);
+            }
+
+            return validTileTypes;
+        }
+
+        void collapseTileAt(TilePosition pos) {
+            var validTileTypes = getValidTileTypesAt(pos);
+            if (validTileTypes.isEmpty()) {
+                throw new RuntimeException("No valid tile types available");
+            }
+
+            int totalFrequencyOfValidTiles = validTileTypes.stream()
+                .map(tileType -> tileFrequencies.get(tileType))
+                .reduce(0, Integer::sum);
+
+            int randomValue = random.nextInt(totalFrequencyOfValidTiles);
+            for (int tileType : validTileTypes) {
+                randomValue -= tileFrequencies.get(tileType);
+                if (randomValue <= 0) {
+                    setCollapsedTileTypeAt(pos, tileType);
+                    return;
+                }
+            }
+
+            throw new RuntimeException("Failed to select a tile type");
+        }
+
+        void addNeighboursToCollapse(TilePosition pos) {
+            for (var dir : NeighbourDirection.values()) {
+                var neighbourPos = pos.neighbour(dir);
+                if (!neighbourPos.isInBounds(size)) {
+                    continue;
+                }
+
+                if (getCollapsedTileTypeAt(neighbourPos) != null) {
+                    continue;
+                }
+
+                var oldUncollapsedItem = getUncollapsedItemAt(neighbourPos);
+                if (oldUncollapsedItem != null) {
+                    uncollapsedQueue.remove(oldUncollapsedItem);
+                }
+
+                var newEntropy = getEntropyAt(neighbourPos);
+                var newUncollapsedItem = new UncollapsedItem(neighbourPos, newEntropy);
+                uncollapsedQueue.add(newUncollapsedItem);
+                setUncollapsedItemAt(neighbourPos, newUncollapsedItem);
+            }
+        }
+
+        float getEntropyAt(TilePosition pos) {
+            var validTiles = getValidTileTypesAt(pos);
+
+            int totalFrequency = validTiles.stream()
+                .map(tileType -> tileFrequencies.get(tileType))
+                .reduce(0, Integer::sum);
+
+            float entropy = 0.0f;
+
+            for (int tileType : validTiles) {
+                float probability = (float) tileFrequencies.get(tileType) / totalFrequency;
+                entropy -= probability * (float) Math.log(probability);
+            }
+
+            return entropy;
+        }
+
+        public int[][] getResult() {
+            int[][] result = new int[size.rows()][size.cols()];
+            for (int row = 0; row < size.rows(); row++) {
+                for (int col = 0; col < size.cols(); col++) {
+                    result[row][col] = collapsedTileTypes[row][col];
+                }
+            }
+            return result;
+        }
+    }
+
 }
