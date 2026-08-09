@@ -56,6 +56,11 @@ public static class WFC2DDemo extends processing.core.PApplet {
         background(BACKGROUND);
         stroke(BACKGROUND);
 
+        if (mousePressed) {
+            clickOnGrid(SAMPLE_X, SAMPLE_Y, sampleGrid);
+        }
+
+
         drawGrid(sampleGrid, SAMPLE_X, SAMPLE_Y);
         drawGrid(resultGrid, RESULT_X, RESULT_Y);
     }
@@ -120,10 +125,5 @@ public static class WFC2DDemo extends processing.core.PApplet {
                 }
             }
         }
-    }
-
-    @Override
-    public void mouseClicked() {
-        clickOnGrid(SAMPLE_X, SAMPLE_Y, sampleGrid);
     }
 }
