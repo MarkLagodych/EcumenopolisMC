@@ -1,9 +1,6 @@
 package org.sgengine.algorithms;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Random;
+import java.util.*;
 import java.util.random.RandomGenerator;
 
 public class WFC2D {
@@ -13,23 +10,18 @@ public class WFC2D {
     // Tile type -> Number of times that tile type appears in the sample
     HashMap<Integer, Integer> tileFrequencies = new HashMap<>();
 
-    // [NeighbourDirection] -> Tile type -> Set of valid neighbour tile types in that direction
-    @SuppressWarnings("unchecked")
-    HashMap<Integer, HashSet<Integer>>[] validNeighboursAtDirection = new HashMap[]{
-        new HashMap<>(), // ABOVE
-        new HashMap<>(), // RIGHT
-        new HashMap<>(), // BELOW
-        new HashMap<>()  // LEFT
-    };
+    // NeighbourDirection -> Tile type -> Set of valid neighbour tile types in that direction
+    EnumMap<NeighbourDirection, HashMap<Integer, HashSet<Integer>>> validNeighboursAtDirection =
+        new EnumMap<>(NeighbourDirection.class);
 
     void addValidNeighbours(int tile, int neighbourTile, NeighbourDirection dir) {
-        validNeighboursAtDirection[dir.value]
+        validNeighboursAtDirection.get(dir)
             .computeIfAbsent(tile, _ -> new HashSet<>())
             .add(neighbourTile);
     }
 
     HashSet<Integer> getValidNeighbours(int tile, NeighbourDirection dir) {
-        return validNeighboursAtDirection[dir.value]
+        return validNeighboursAtDirection.get(dir)
             .getOrDefault(tile, new HashSet<>());
     }
 
