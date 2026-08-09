@@ -1,20 +1,20 @@
 package org.sgengine.algorithms;
 
-public record TilePosition(int row, int column) {
+public record TilePosition(int row, int col) {
     TilePosition above() {
-        return new TilePosition(row - 1, column);
+        return new TilePosition(row - 1, col);
     }
 
     TilePosition below() {
-        return new TilePosition(row + 1, column);
+        return new TilePosition(row + 1, col);
     }
 
     TilePosition left() {
-        return new TilePosition(row, column - 1);
+        return new TilePosition(row, col - 1);
     }
 
     TilePosition right() {
-        return new TilePosition(row, column + 1);
+        return new TilePosition(row, col + 1);
     }
 
     TilePosition neighbour(NeighbourDirection direction) {
@@ -29,8 +29,8 @@ public record TilePosition(int row, int column) {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isInBounds(MapSize mapSize) {
         return row >= 0
-            && column >= 0
+            && col >= 0
             && row < mapSize.rows()
-            && column < mapSize.cols();
+            && col < mapSize.cols();
     }
 }

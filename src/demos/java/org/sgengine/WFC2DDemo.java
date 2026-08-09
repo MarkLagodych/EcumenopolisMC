@@ -91,9 +91,13 @@ public static class WFC2DDemo extends processing.core.PApplet {
             }
 
             case 'g', 'G' -> {
-                resultGrid = new WFC2D(sampleGrid).generate(
-                    new MapSize(RESULT_HEIGHT, RESULT_WIDTH)
-                );
+                try {
+                    resultGrid = new WFC2D(sampleGrid).generate(
+                        new MapSize(RESULT_HEIGHT, RESULT_WIDTH)
+                    );
+                } catch (Exception e) {
+                    System.err.println("Failed to generate result: " + e.getMessage());
+                }
             }
 
             case 'c', 'C' -> {

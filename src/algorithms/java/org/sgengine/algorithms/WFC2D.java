@@ -13,7 +13,7 @@ public class WFC2D {
     // Tile type -> Number of times that tile type appears in the sample
     HashMap<Integer, Integer> tileFrequencies = new HashMap<>();
 
-    // NeighbourDirection -> Tile type -> Set of valid neighbour tile types in that direction
+    // [NeighbourDirection] -> Tile type -> Set of valid neighbour tile types in that direction
     @SuppressWarnings("unchecked")
     HashMap<Integer, HashSet<Integer>>[] validNeighboursAtDirection = new HashMap[]{
         new HashMap<>(), // ABOVE
@@ -103,13 +103,6 @@ public class WFC2D {
 
         UncollapsedItem[][] uncollapsedMap;
 
-        UncollapsedItem getUncollapsedItemAt(TilePosition p) {
-            return uncollapsedMap[p.row()][p.column()];
-        }
-
-        void setUncollapsedItemAt(TilePosition p, UncollapsedItem item) {
-            uncollapsedMap[p.row()][p.column()] = item;
-        }
 
         PriorityQueue<UncollapsedItem> uncollapsedQueue = new PriorityQueue<>(
             (a, b) -> Float.compare(a.entropy, b.entropy)
@@ -117,18 +110,28 @@ public class WFC2D {
 
         Integer[][] collapsedTileTypes;
 
-        Integer getCollapsedTileTypeAt(TilePosition p) {
-            return collapsedTileTypes[p.row()][p.column()];
-        }
-
-        void setCollapsedTileTypeAt(TilePosition p, Integer tileType) {
-            collapsedTileTypes[p.row()][p.column()] = tileType;
-        }
 
         public CollapseState(MapSize size) {
             this.size = size;
             this.uncollapsedMap = new UncollapsedItem[size.rows()][size.cols()];
             this.collapsedTileTypes = new Integer[size.rows()][size.cols()];
+        }
+
+
+        UncollapsedItem getUncollapsedItemAt(TilePosition p) {
+            return uncollapsedMap[p.row()][p.col()];
+        }
+
+        void setUncollapsedItemAt(TilePosition p, UncollapsedItem item) {
+            uncollapsedMap[p.row()][p.col()] = item;
+        }
+
+        Integer getCollapsedTileTypeAt(TilePosition p) {
+            return collapsedTileTypes[p.row()][p.col()];
+        }
+
+        void setCollapsedTileTypeAt(TilePosition p, Integer tileType) {
+            collapsedTileTypes[p.row()][p.col()] = tileType;
         }
 
         public void collapse() {
@@ -203,8 +206,11 @@ public class WFC2D {
                     uncollapsedQueue.remove(oldUncollapsedItem);
                 }
 
-                var newEntropy = getEntropyAt(neighbourPos);
-                var newUncollapsedItem = new UncollapsedItem(neighbourPos, newEntropy);
+                var newUncollapsedItem = new UncollapsedItem(
+                    neighbourPos,
+                    getEntropyAt(neighbourPos)
+                );
+
                 uncollapsedQueue.add(newUncollapsedItem);
                 setUncollapsedItemAt(neighbourPos, newUncollapsedItem);
             }
