@@ -14,6 +14,13 @@ public class WFC2D {
     EnumMap<NeighbourDirection, HashMap<Integer, HashSet<Integer>>> validNeighboursAtDirection =
         new EnumMap<>(NeighbourDirection.class);
 
+    {
+        for (var dir : NeighbourDirection.values()) {
+            validNeighboursAtDirection.put(dir, new HashMap<>());
+        }
+    }
+
+
     void addValidNeighbours(int tile, int neighbourTile, NeighbourDirection dir) {
         validNeighboursAtDirection.get(dir)
             .computeIfAbsent(tile, _ -> new HashSet<>())
@@ -24,6 +31,7 @@ public class WFC2D {
         return validNeighboursAtDirection.get(dir)
             .getOrDefault(tile, new HashSet<>());
     }
+
 
     public WFC2D(int[][] sample) {
         addAllTiles(sample);
