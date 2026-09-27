@@ -1,4 +1,4 @@
-package org.sgengine.algorithms;
+package org.ecumenopolismc.algorithms;
 
 public record TilePosition(int row, int col) {
     TilePosition above() {

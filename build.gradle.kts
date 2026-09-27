@@ -24,7 +24,7 @@ sourceSets {
         compileClasspath += sourceSets["algorithms"].output
         runtimeClasspath += sourceSets["algorithms"].output
     }
-    
+
     create("demos") {
         java.srcDir("src/demos/java")
 
@@ -37,7 +37,7 @@ loom {
     splitEnvironmentSourceSets()
 
     mods {
-        register("sgengine") {
+        register("ecumenopolismc") {
             sourceSet(sourceSets.main.get())
             sourceSet(sourceSets.getByName("client"))
         }
@@ -56,15 +56,17 @@ dependencies {
         }"
     )
 
+    implementation(sourceSets["algorithms"].output)
+
     add("demosImplementation", "org.processing:core:4.5.6")
 }
 
-listOf("WFC2DDemo").forEach { demo ->
-    tasks.register<JavaExec>("run$demo") {
-        description = "Run the $demo demo."
+listOf("WFC2DDemo").forEach { demoName ->
+    tasks.register<JavaExec>("run$demoName") {
+        description = "Run the $demoName demo."
         group = "demos"
         classpath = sourceSets["demos"].runtimeClasspath
-        mainClass = demo
+        mainClass = demoName
     }
 }
 
@@ -94,6 +96,8 @@ java {
 tasks.jar {
     val projectName = project.name
     inputs.property("projectName", projectName)
+
+    from(sourceSets["algorithms"].output)
 
     from("LICENSE.txt") {
         rename { "LICENSE-$projectName.txt" }

@@ -1,4 +1,4 @@
-package org.sgengine.algorithms;
+package org.ecumenopolismc.algorithms;
 
 import java.util.*;
 import java.util.random.RandomGenerator;

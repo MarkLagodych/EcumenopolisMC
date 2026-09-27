@@ -1,8 +1,8 @@
-package org.sgengine.client;
+package org.ecumenopolismc.client;
 
 import net.fabricmc.api.ClientModInitializer;
 
-public class SGEngineClient implements ClientModInitializer {
+public class ecumenopolismcClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         // This entrypoint is suitable for setting up client-specific logic, such as rendering.

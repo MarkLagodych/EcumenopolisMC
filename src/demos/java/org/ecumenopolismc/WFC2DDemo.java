@@ -6,8 +6,8 @@ Controls:
   - G: generate new result
 */
 
-import org.sgengine.algorithms.MapSize;
-import org.sgengine.algorithms.WFC2D;
+import org.ecumenopolismc.algorithms.MapSize;
+import org.ecumenopolismc.algorithms.WFC2D;
 
 void main() {
     processing.core.PApplet.main(WFC2DDemo.class);

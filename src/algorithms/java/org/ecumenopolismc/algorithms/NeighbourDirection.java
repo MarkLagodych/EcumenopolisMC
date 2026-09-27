@@ -1,4 +1,4 @@
-package org.sgengine.algorithms;
+package org.ecumenopolismc.algorithms;
 
 public enum NeighbourDirection {
     ABOVE(0),

@@ -1,5 +1,5 @@
-# SG Engine
+# Ecumenopolis Minecraft mod (work in progress!!!)
 
-SG Engine (Structure Generation Engine) adds configurable procedural structure generation to Minecraft.
-This is a stand-alone mod, just load your configuration and it will generate infinitely many random structures
-in your world!
+Ecumenopolis generates large vertical cities.
+Tall buildings are connected together by many levels of bridges and streets.
+Everything is procedurally generated.
