@@ -6,14 +6,12 @@ Controls:
   - G: generate new result
 */
 
-import org.ecumenopolismc.algorithms.MapSize;
-import org.ecumenopolismc.algorithms.WFC2D;
+import java.util.Arrays;
+import org.ecumenopolismc.lib.MapSize;
+import org.ecumenopolismc.lib.WFC2D;
+import processing.core.PApplet;
 
-void main() {
-    processing.core.PApplet.main(WFC2DDemo.class);
-}
-
-public static class WFC2DDemo extends processing.core.PApplet {
+public class VisualizeWFC2D extends PApplet {
     final int[] TILE_COLORS = {
         0xff000000, // 0 = black
         0xffff0000, // 1 = red
@@ -46,9 +44,18 @@ public static class WFC2DDemo extends processing.core.PApplet {
     int[][] sampleGrid = new int[SAMPLE_HEIGHT][SAMPLE_WIDTH];
     int[][] resultGrid = new int[RESULT_HEIGHT][RESULT_WIDTH];
 
+    public static void main(String[] args) {
+        PApplet.main(VisualizeWFC2D.class, args);
+    }
+
     @Override
     public void settings() {
         size(800, 600);
+    }
+
+    @Override
+    public void setup() {
+        surface.setTitle("Wave Function Collapse 2D");
     }
 
     @Override
@@ -59,7 +66,6 @@ public static class WFC2DDemo extends processing.core.PApplet {
         if (mousePressed) {
             clickOnGrid(SAMPLE_X, SAMPLE_Y, sampleGrid);
         }
-
 
         drawGrid(sampleGrid, SAMPLE_X, SAMPLE_Y);
         drawGrid(resultGrid, RESULT_X, RESULT_Y);
@@ -82,19 +88,18 @@ public static class WFC2DDemo extends processing.core.PApplet {
         }
     }
 
-    @SuppressWarnings("RedundantLabeledSwitchRuleCodeBlock")
     @Override
     public void keyReleased() {
-        switch (key) {
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+        switch ((Character) key) {
+            case Character k when k >= '0' && k <= '9' -> {
                 currentColorIndex = key - '0';
             }
 
             case 'g', 'G' -> {
                 try {
-                    resultGrid = new WFC2D(sampleGrid).generate(
-                        new MapSize(RESULT_HEIGHT, RESULT_WIDTH)
-                    );
+                    resultGrid =
+                            new WFC2D(sampleGrid)
+                                    .generate(new MapSize(RESULT_HEIGHT, RESULT_WIDTH));
                 } catch (Exception e) {
                     System.err.println("Failed to generate result: " + e.getMessage());
                 }
@@ -105,6 +110,8 @@ public static class WFC2DDemo extends processing.core.PApplet {
                     Arrays.fill(ints, 0);
                 }
             }
+
+            default -> {}
         }
     }
 
@@ -120,8 +127,7 @@ public static class WFC2DDemo extends processing.core.PApplet {
 
     void clickOnGrid(int startX, int startY, int[][] grid) {
         for (int row = 0; row < grid.length; row++) {
-            if (!didHitRow(startX, startY, row))
-                continue;
+            if (!didHitRow(startX, startY, row)) continue;
 
             for (int col = 0; col < grid[row].length; col++) {
                 if (didHitColumn(startX, startY, col)) {

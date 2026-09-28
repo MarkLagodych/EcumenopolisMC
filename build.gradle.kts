@@ -1,38 +1,31 @@
+allprojects {
+    group = "org.ecumenopolismc"
+    version = "1.0.0"
+}
+
 plugins {
-    java
-    id("net.fabricmc.fabric-loom")
-    `maven-publish`
+    id("java")
+    id("maven-publish")
+    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT"
+    id("com.diffplug.spotless") version "8.10.1"
 }
 
-version = providers.gradleProperty("mod_version").get()
-group = providers.gradleProperty("maven_group").get()
+dependencies {
+    implementation(project(":lib"))
 
-repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
+    minecraft("com.mojang:minecraft:26.2")
+
+    implementation("net.fabricmc:fabric-loader:0.19.3")
+    implementation("net.fabricmc.fabric-api:fabric-api:0.156.0+26.2")
 }
 
-sourceSets {
-    create("algorithms") {
-        java.srcDir("src/algorithms/java")
-    }
-
-    getByName("main") {
-        compileClasspath += sourceSets["algorithms"].output
-        runtimeClasspath += sourceSets["algorithms"].output
-    }
-
-    create("demos") {
-        java.srcDir("src/demos/java")
-
-        compileClasspath += sourceSets["algorithms"].output
-        runtimeClasspath += sourceSets["algorithms"].output
+spotless {
+    java {
+        googleJavaFormat().aosp() // Android Open Source Project style
     }
 }
 
+// Fabric mod configuration
 loom {
     splitEnvironmentSourceSets()
 
@@ -41,32 +34,6 @@ loom {
             sourceSet(sourceSets.main.get())
             sourceSet(sourceSets.getByName("client"))
         }
-    }
-}
-
-dependencies {
-    // To change the versions see the gradle.properties file
-    minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
-    implementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    implementation(
-        "net.fabricmc.fabric-api:fabric-api:${
-            providers.gradleProperty("fabric_api_version").get()
-        }"
-    )
-
-    implementation(sourceSets["algorithms"].output)
-
-    add("demosImplementation", "org.processing:core:4.5.6")
-}
-
-listOf("WFC2DDemo").forEach { demoName ->
-    tasks.register<JavaExec>("run$demoName") {
-        description = "Run the $demoName demo."
-        group = "demos"
-        classpath = sourceSets["demos"].runtimeClasspath
-        mainClass = demoName
     }
 }
 
@@ -97,14 +64,11 @@ tasks.jar {
     val projectName = project.name
     inputs.property("projectName", projectName)
 
-    from(sourceSets["algorithms"].output)
-
     from("LICENSE.txt") {
         rename { "LICENSE-$projectName.txt" }
     }
 }
 
-// configure the maven publication
 publishing {
     publications {
         register<MavenPublication>("mavenJava") {
@@ -115,8 +79,5 @@ publishing {
     // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
         // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
     }
 }

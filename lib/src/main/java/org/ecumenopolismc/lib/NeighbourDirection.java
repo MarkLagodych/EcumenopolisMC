@@ -1,4 +1,4 @@
-package org.ecumenopolismc.algorithms;
+package org.ecumenopolismc.lib;
 
 public enum NeighbourDirection {
     ABOVE(0),

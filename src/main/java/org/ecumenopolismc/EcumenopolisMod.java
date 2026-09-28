@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import java.util.Arrays;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
@@ -13,12 +14,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
-import org.ecumenopolismc.algorithms.MapSize;
-import org.ecumenopolismc.algorithms.WFC2D;
+import org.ecumenopolismc.lib.MapSize;
+import org.ecumenopolismc.lib.WFC2D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
 
 public class EcumenopolisMod implements ModInitializer {
     public static final String MOD_ID = "ecumenopolismc";
@@ -37,43 +36,67 @@ public class EcumenopolisMod implements ModInitializer {
     }
 
     void registerCommands(
-        CommandDispatcher<CommandSourceStack> dispatcher,
-        CommandBuildContext buildContext,
-        Commands.CommandSelection environment
-    ) {
+            CommandDispatcher<CommandSourceStack> dispatcher,
+            CommandBuildContext buildContext,
+            Commands.CommandSelection environment) {
         var coordType = IntegerArgumentType.integer();
 
         dispatcher.register(
-            Commands.literal("sge")
-                .then(Commands.literal("wfc")
-                    .then(Commands.literal("learn")
-                        .then(Commands.argument("x", coordType)
-                            .then(Commands.argument("y", coordType)
-                                .then(Commands.argument("z", coordType)
-                                    .then(Commands.argument("w", coordType)
-                                        .then(Commands.argument("h", coordType)
-                                            .executes(this::wfcLearn)
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                    .then(Commands.literal("generate")
-                        .then(Commands.argument("x", coordType)
-                            .then(Commands.argument("y", coordType)
-                                .then(Commands.argument("z", coordType)
-                                    .then(Commands.argument("w", coordType)
-                                        .then(Commands.argument("h", coordType)
-                                            .executes(this::wfcGenerate)
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-        );
+                Commands.literal("sge")
+                        .then(
+                                Commands.literal("wfc")
+                                        .then(
+                                                Commands.literal("learn")
+                                                        .then(
+                                                                Commands.argument("x", coordType)
+                                                                        .then(
+                                                                                Commands.argument(
+                                                                                                "y",
+                                                                                                coordType)
+                                                                                        .then(
+                                                                                                Commands
+                                                                                                        .argument(
+                                                                                                                "z",
+                                                                                                                coordType)
+                                                                                                        .then(
+                                                                                                                Commands
+                                                                                                                        .argument(
+                                                                                                                                "w",
+                                                                                                                                coordType)
+                                                                                                                        .then(
+                                                                                                                                Commands
+                                                                                                                                        .argument(
+                                                                                                                                                "h",
+                                                                                                                                                coordType)
+                                                                                                                                        .executes(
+                                                                                                                                                this
+                                                                                                                                                        ::wfcLearn)))))))
+                                        .then(
+                                                Commands.literal("generate")
+                                                        .then(
+                                                                Commands.argument("x", coordType)
+                                                                        .then(
+                                                                                Commands.argument(
+                                                                                                "y",
+                                                                                                coordType)
+                                                                                        .then(
+                                                                                                Commands
+                                                                                                        .argument(
+                                                                                                                "z",
+                                                                                                                coordType)
+                                                                                                        .then(
+                                                                                                                Commands
+                                                                                                                        .argument(
+                                                                                                                                "w",
+                                                                                                                                coordType)
+                                                                                                                        .then(
+                                                                                                                                Commands
+                                                                                                                                        .argument(
+                                                                                                                                                "h",
+                                                                                                                                                coordType)
+                                                                                                                                        .executes(
+                                                                                                                                                this
+                                                                                                                                                        ::wfcGenerate)))))))));
     }
 
     int wfcLearn(CommandContext<CommandSourceStack> context) {
@@ -115,9 +138,8 @@ public class EcumenopolisMod implements ModInitializer {
         try {
             map = wfc2D.generate(new MapSize(w, h));
         } catch (Exception e) {
-            context.getSource().sendFailure(
-                Component.literal("WFC generation failed: " + e.getMessage())
-            );
+            context.getSource()
+                    .sendFailure(Component.literal("WFC generation failed: " + e.getMessage()));
 
             return 0;
         }

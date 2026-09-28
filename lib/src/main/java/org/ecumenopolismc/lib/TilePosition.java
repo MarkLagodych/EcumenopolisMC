@@ -1,4 +1,4 @@
-package org.ecumenopolismc.algorithms;
+package org.ecumenopolismc.lib;
 
 public record TilePosition(int row, int col) {
     TilePosition above() {
@@ -26,11 +26,7 @@ public record TilePosition(int row, int col) {
         };
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isInBounds(MapSize mapSize) {
-        return row >= 0
-            && col >= 0
-            && row < mapSize.rows()
-            && col < mapSize.cols();
+        return row >= 0 && col >= 0 && row < mapSize.rows() && col < mapSize.cols();
     }
 }

@@ -1,4 +1,4 @@
-package org.ecumenopolismc.algorithms;
+package org.ecumenopolismc.lib;
 
 import java.util.*;
 import java.util.random.RandomGenerator;
@@ -12,7 +12,7 @@ public class WFC2D {
 
     // NeighbourDirection -> Tile type -> Set of valid neighbour tile types in that direction
     EnumMap<NeighbourDirection, HashMap<Integer, HashSet<Integer>>> validNeighboursAtDirection =
-        new EnumMap<>(NeighbourDirection.class);
+            new EnumMap<>(NeighbourDirection.class);
 
     {
         for (var dir : NeighbourDirection.values()) {
@@ -20,18 +20,16 @@ public class WFC2D {
         }
     }
 
-
     void addValidNeighbours(int tile, int neighbourTile, NeighbourDirection dir) {
-        validNeighboursAtDirection.get(dir)
-            .computeIfAbsent(tile, _ -> new HashSet<>())
-            .add(neighbourTile);
+        validNeighboursAtDirection
+                .get(dir)
+                .computeIfAbsent(tile, _ -> new HashSet<>())
+                .add(neighbourTile);
     }
 
     HashSet<Integer> getValidNeighbours(int tile, NeighbourDirection dir) {
-        return validNeighboursAtDirection.get(dir)
-            .getOrDefault(tile, new HashSet<>());
+        return validNeighboursAtDirection.get(dir).getOrDefault(tile, new HashSet<>());
     }
-
 
     public WFC2D(int[][] sample) {
         addAllTiles(sample);
@@ -89,13 +87,11 @@ public class WFC2D {
         }
 
         throw new RuntimeException(
-            "Failed to generate a valid grid after " + MAX_ATTEMPTS + " tries"
-        );
+                "Failed to generate a valid grid after " + MAX_ATTEMPTS + " tries");
     }
 
     class CollapseState {
-        record UncollapsedItem(TilePosition position, float entropy) {
-        }
+        record UncollapsedItem(TilePosition position, float entropy) {}
 
         RandomGenerator random = new Random();
 
@@ -103,20 +99,16 @@ public class WFC2D {
 
         UncollapsedItem[][] uncollapsedMap;
 
-
-        PriorityQueue<UncollapsedItem> uncollapsedQueue = new PriorityQueue<>(
-            (a, b) -> Float.compare(a.entropy, b.entropy)
-        );
+        PriorityQueue<UncollapsedItem> uncollapsedQueue =
+                new PriorityQueue<>((a, b) -> Float.compare(a.entropy, b.entropy));
 
         Integer[][] collapsedTileTypes;
-
 
         public CollapseState(MapSize size) {
             this.size = size;
             this.uncollapsedMap = new UncollapsedItem[size.rows()][size.cols()];
             this.collapsedTileTypes = new Integer[size.rows()][size.cols()];
         }
-
 
         UncollapsedItem getUncollapsedItemAt(TilePosition p) {
             return uncollapsedMap[p.row()][p.col()];
@@ -174,9 +166,10 @@ public class WFC2D {
                 throw new RuntimeException("No valid tile types available");
             }
 
-            int totalFrequencyOfValidTiles = validTileTypes.stream()
-                .map(tileType -> tileFrequencies.get(tileType))
-                .reduce(0, Integer::sum);
+            int totalFrequencyOfValidTiles =
+                    validTileTypes.stream()
+                            .map(tileType -> tileFrequencies.get(tileType))
+                            .reduce(0, Integer::sum);
 
             int randomValue = random.nextInt(totalFrequencyOfValidTiles);
             for (int tileType : validTileTypes) {
@@ -206,10 +199,8 @@ public class WFC2D {
                     uncollapsedQueue.remove(oldUncollapsedItem);
                 }
 
-                var newUncollapsedItem = new UncollapsedItem(
-                    neighbourPos,
-                    getEntropyAt(neighbourPos)
-                );
+                var newUncollapsedItem =
+                        new UncollapsedItem(neighbourPos, getEntropyAt(neighbourPos));
 
                 uncollapsedQueue.add(newUncollapsedItem);
                 setUncollapsedItemAt(neighbourPos, newUncollapsedItem);
@@ -219,9 +210,10 @@ public class WFC2D {
         float getEntropyAt(TilePosition pos) {
             var validTiles = getValidTileTypesAt(pos);
 
-            int totalFrequency = validTiles.stream()
-                .map(tileType -> tileFrequencies.get(tileType))
-                .reduce(0, Integer::sum);
+            int totalFrequency =
+                    validTiles.stream()
+                            .map(tileType -> tileFrequencies.get(tileType))
+                            .reduce(0, Integer::sum);
 
             float entropy = 0.0f;
 
@@ -243,5 +235,4 @@ public class WFC2D {
             return result;
         }
     }
-
 }

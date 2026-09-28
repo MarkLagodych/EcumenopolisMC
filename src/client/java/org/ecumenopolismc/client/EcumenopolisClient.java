@@ -2,7 +2,7 @@ package org.ecumenopolismc.client;
 
 import net.fabricmc.api.ClientModInitializer;
 
-public class ecumenopolismcClient implements ClientModInitializer {
+public class EcumenopolisClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         // This entrypoint is suitable for setting up client-specific logic, such as rendering.
