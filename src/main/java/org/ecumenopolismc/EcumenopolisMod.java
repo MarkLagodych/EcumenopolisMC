@@ -14,8 +14,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
-import org.ecumenopolismc.lib.MapSize;
-import org.ecumenopolismc.lib.WFC2D;
+import org.ecumenopolismc.lib.wfc2d.MapSize;
+import org.ecumenopolismc.lib.wfc2d.WFC2D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
