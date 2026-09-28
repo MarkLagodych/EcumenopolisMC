@@ -2,16 +2,16 @@
     "schemaVersion": 1,
     "id": "ecumenopolismc",
     "version": "${version}",
-    "name": "ecumenopolismc",
-    "description": "This is an example description! Tell everyone what your mod is about!",
+    "name": "Ecumenopolis",
+    "description": "Generates large multi-level cities",
     "authors": [
-        "Me!"
+        "Mark Lagodych <lgd.mrk@outlook.com>"
     ],
     "contact": {
-        "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
+        "homepage": "https://github.com/MarkLagodych/EcumenopolisMC",
+        "sources": "https://github.com/MarkLagodych/EcumenopolisMC"
     },
-    "license": "CC0-1.0",
+    "license": "LGPL-3.0-only",
     "icon": "assets/ecumenopolismc/icon.png",
     "environment": "*",
     "entrypoints": {
